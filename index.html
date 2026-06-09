@@ -54,29 +54,35 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 /* ── STATS ── */
 .stats-wrap {
-  padding: 12px 16px 14px;
+  padding: 10px 16px 12px;
   background: var(--s1); border-bottom: 1px solid var(--border);
 }
 .stats-hero {
-  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px;
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
 }
-.hero-n     { font-family: 'Syne', sans-serif; font-size: 34px; font-weight: 800; color: var(--green); line-height: 1; }
-.hero-sep   { font-size: 18px; color: var(--muted); margin: 0 5px; }
-.hero-total { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--muted); }
-.hero-lbl   { font-size: 12px; color: var(--muted); margin-left: 7px; }
-.hero-pct   { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); opacity:.8; }
-.progress-track { height: 4px; background: var(--s3); border-radius: 99px; overflow: hidden; margin-bottom: 10px; }
+.hero-left  { display: flex; align-items: baseline; gap: 4px; }
+.hero-n     { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--green); line-height: 1; }
+.hero-sep   { font-size: 13px; color: var(--muted); }
+.hero-total { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--muted); }
+.hero-lbl   { font-size: 12px; color: var(--muted); margin-left: 4px; }
+.hero-pct   { font-size: 12px; font-weight: 600; color: var(--green); opacity: .75; }
+.progress-track { height: 3px; background: var(--s3); border-radius: 99px; overflow: hidden; margin-bottom: 10px; }
 .progress-fill  { height: 100%; background: var(--green); border-radius: 99px; transition: width .5s ease; width: 0%; }
-.stats-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip {
-  font-size: 11px; font-weight: 600; padding: 4px 10px;
-  border-radius: 99px; border: 1px solid transparent; white-space: nowrap;
+.stats-chips {
+  display: flex; gap: 5px;
+  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
-.chip b { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 12px; margin-right: 3px; }
-.chip.c-none { background: rgba(120,128,160,.1); border-color: rgba(120,128,160,.25); color: var(--muted); }
-.chip.c-try  { background: rgba(79,156,249,.1);  border-color: rgba(79,156,249,.25);  color: var(--blue);   }
-.chip.c-go   { background: rgba(245,197,24,.1);  border-color: rgba(245,197,24,.25);  color: var(--yellow); }
-.chip.c-no   { background: rgba(240,92,92,.1);   border-color: rgba(240,92,92,.25);   color: var(--red);    }
+.stats-chips::-webkit-scrollbar { display: none; }
+.chip {
+  font-size: 11px; font-weight: 500; padding: 4px 9px;
+  border-radius: 99px; border: 1px solid transparent;
+  white-space: nowrap; flex-shrink: 0;
+}
+.chip b { font-weight: 700; margin-right: 2px; }
+.chip.c-none { background: rgba(120,128,160,.1); border-color: rgba(120,128,160,.2); color: var(--muted); }
+.chip.c-try  { background: rgba(79,156,249,.1);  border-color: rgba(79,156,249,.2);  color: var(--blue);   }
+.chip.c-go   { background: rgba(245,197,24,.1);  border-color: rgba(245,197,24,.2);  color: var(--yellow); }
+.chip.c-no   { background: rgba(240,92,92,.1);   border-color: rgba(240,92,92,.2);   color: var(--red);    }
 
 /* ── SEARCH BAR ── */
 .searchbar {
@@ -302,7 +308,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <!-- STATS -->
 <div class="stats-wrap">
   <div class="stats-hero">
-    <div>
+    <div class="hero-left">
       <span class="hero-n" id="sInscrito">0</span>
       <span class="hero-sep">/</span>
       <span class="hero-total" id="sTotal">0</span>
@@ -312,10 +318,10 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   </div>
   <div class="progress-track"><div class="progress-fill" id="sProgress"></div></div>
   <div class="stats-chips">
-    <div class="chip c-none"><b id="sVirgem">0</b>s/ contato</div>
-    <div class="chip c-try"><b id="sTentando">0</b>tentando</div>
-    <div class="chip c-go"><b id="sVai">0</b>confirmados</div>
-    <div class="chip c-no"><b id="sNao">0</b>não vão</div>
+    <div class="chip c-none"><b id="sVirgem">0</b> s/contato</div>
+    <div class="chip c-try"><b id="sTentando">0</b> tentando</div>
+    <div class="chip c-go"><b id="sVai">0</b> confirmados</div>
+    <div class="chip c-no"><b id="sNao">0</b> não vão</div>
   </div>
 </div>
 
