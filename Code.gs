@@ -5,7 +5,7 @@
 // Implantar > Gerenciar implantações > editar > NOVA VERSÃO > salvar
 
 const SHEET_NAME = "Planilha1";
-const SPREADSHEET_ID = "1c2qtOwLuZuQhOO8Ot5OGsZXaNx4i7GcBVqCwq_DyhQk";
+const SPREADSHEET_ID = "1oePRbSLcdwlKIn_kFVJCIB670VfzX4D-nNou9jxn9MA";
 
 function doGet(e) {
   const action = (e.parameter && e.parameter.action) || "getAll";
