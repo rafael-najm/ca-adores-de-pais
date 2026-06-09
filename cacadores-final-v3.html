@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Caçadores de Pais</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #0f1117;
+  --s1: #181b26;
+  --s2: #1e2130;
+  --s3: #252940;
+  --border: #2c3050;
+  --accent: #f5a623;
+  --text: #eef0f8;
+  --muted: #7880a0;
+  --green: #3ecf8e;
+  --yellow: #f5c518;
+  --red: #f05c5c;
+  --blue: #4f9cf9;
+  --purple: #a78bfa;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; }
+
+/* ── HEADER ── */
+.header {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; }
+.logo em { color: var(--accent); font-style: normal; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.pill {
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+  background: rgba(245,166,35,.13); border: 1px solid rgba(245,166,35,.35);
+  color: var(--accent); padding: 5px 11px; border-radius: 99px; white-space: nowrap;
+}
+.icon-btn {
+  background: var(--s2); border: 1px solid var(--border); border-radius: 8px;
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted); font-size: 16px; transition: all .2s;
+}
+.icon-btn:active { background: var(--s3); }
+.icon-btn.spinning { animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── STATS ── */
+.stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; padding: 12px 16px;
+  background: var(--s1); border-bottom: 1px solid var(--border);
+}
+.stat {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 8px; text-align: center;
+}
+.stat .n {
+  font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; line-height: 1;
+}
+.stat .lbl { font-size: 9px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .5px; }
+.stat.c-all .n   { color: var(--text); }
+.stat.c-none .n  { color: var(--muted); }
+.stat.c-try .n   { color: var(--blue); }
+.stat.c-go .n    { color: var(--yellow); }
+.stat.c-ok .n    { color: var(--green); }
+.stat.c-no .n    { color: var(--red); }
+
+/* ── SEARCH BAR ── */
+.searchbar {
+  padding: 10px 16px; display: flex; gap: 8px;
+  background: var(--s1); border-bottom: 1px solid var(--border);
+  position: sticky; top: 59px; z-index: 40;
+}
+.searchbar input {
+  flex: 1; background: var(--s2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 14px; color: var(--text);
+  font-size: 14px; font-family: 'Inter', sans-serif; outline: none;
+}
+.searchbar input:focus { border-color: var(--accent); }
+.searchbar input::placeholder { color: var(--muted); }
+.filter-btn {
+  background: var(--s2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 0 14px; color: var(--muted); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center;
+}
+.add-btn {
+  background: var(--accent); border: none; border-radius: 10px;
+  padding: 0 14px; color: #111; font-size: 20px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center;
+}
+
+/* ── TURMA TABS ── */
+.tabs-wrap {
+  overflow-x: auto; scrollbar-width: none;
+  background: var(--s1); border-bottom: 1px solid var(--border);
+  position: sticky; top: 109px; z-index: 39;
+}
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tabs {
+  display: flex; gap: 4px; padding: 8px 16px;
+  width: max-content;
+}
+.tab {
+  padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500;
+  cursor: pointer; white-space: nowrap; color: var(--muted);
+  background: transparent; border: 1px solid transparent;
+  font-family: 'Inter', sans-serif; transition: all .15s;
+}
+.tab.on { background: var(--s3); border-color: var(--border); color: var(--text); }
+
+/* ── CARDS ── */
+.content { padding: 12px 16px 100px; }
+
+.turma-label {
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .8px;
+  margin: 16px 0 8px; display: flex; align-items: center; gap: 8px;
+}
+.turma-label span {
+  background: var(--s2); border: 1px solid var(--border);
+  font-size: 10px; padding: 2px 8px; border-radius: 99px;
+  color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0;
+}
+
+.card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 14px; margin-bottom: 8px; overflow: hidden;
+  transition: border-color .2s;
+}
+.card.expanded { border-color: var(--accent); }
+
+.card-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; cursor: pointer;
+}
+.card-name { font-weight: 600; font-size: 15px; flex: 1; min-width: 0; }
+.card-turma-mini { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  cursor: pointer; border: none; font-family: 'Inter', sans-serif;
+  white-space: nowrap; flex-shrink: 0;
+}
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.b-virgem   { background: rgba(120,128,160,.15); color: var(--muted);   border: 1px solid rgba(120,128,160,.3); }
+.b-tentando { background: rgba(79,156,249,.15);  color: var(--blue);    border: 1px solid rgba(79,156,249,.3); }
+.b-vai      { background: rgba(245,197,24,.15);  color: var(--yellow);  border: 1px solid rgba(245,197,24,.3); }
+.b-inscrito { background: rgba(62,207,142,.15);  color: var(--green);   border: 1px solid rgba(62,207,142,.3); }
+.b-nao      { background: rgba(240,92,92,.15);   color: var(--red);     border: 1px solid rgba(240,92,92,.3); }
+
+.chevron { color: var(--muted); font-size: 12px; transition: transform .2s; flex-shrink: 0; }
+.card.expanded .chevron { transform: rotate(180deg); }
+
+/* expanded body */
+.card-body { display: none; padding: 0 14px 14px; border-top: 1px solid var(--border); }
+.card.expanded .card-body { display: block; }
+
+.field-row { margin-top: 10px; }
+.field-row label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+.field-row input, .field-row textarea {
+  width: 100%; background: var(--s2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 12px; color: var(--text);
+  font-size: 14px; font-family: 'Inter', sans-serif; outline: none;
+}
+.field-row input:focus, .field-row textarea:focus { border-color: var(--accent); }
+.field-row textarea { resize: vertical; min-height: 60px; }
+
+.status-row {
+  margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px;
+}
+.status-opt {
+  padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 2px solid transparent; font-family: 'Inter', sans-serif;
+  transition: all .15s;
+}
+.status-opt.sel { border-color: currentColor !important; }
+
+.card-actions { margin-top: 12px; display: flex; gap: 8px; }
+.card-actions button {
+  flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; font-family: 'Inter', sans-serif;
+}
+.btn-save { background: var(--accent); color: #111; }
+.btn-del  { background: var(--s3); color: var(--muted); border: 1px solid var(--border); }
+
+/* ── FILTER DRAWER ── */
+.drawer-bg {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 80;
+}
+.drawer-bg.open { display: block; }
+.drawer {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+  background: var(--s1); border-top: 1px solid var(--border);
+  border-radius: 20px 20px 0 0; padding: 20px 20px 36px;
+  transform: translateY(100%); transition: transform .3s ease;
+}
+.drawer-bg.open .drawer { transform: translateY(0); }
+.drawer h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+.drawer .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.drawer-opt {
+  padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 500;
+  cursor: pointer; background: var(--s2); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Inter', sans-serif; transition: all .15s;
+}
+.drawer-opt.sel { background: var(--s3); border-color: var(--accent); color: var(--text); }
+
+/* ── ADD MODAL ── */
+.modal-bg {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100;
+  align-items: flex-end; justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 20px 20px 0 0; padding: 20px 20px 36px;
+  width: 100%; max-height: 90vh; overflow-y: auto;
+}
+.modal h2 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+.modal .field-row { margin-top: 12px; }
+.modal .field-row:first-of-type { margin-top: 0; }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.modal-actions button {
+  flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; border: none; font-family: 'Inter', sans-serif;
+}
+.m-save { background: var(--accent); color: #111; }
+.m-cancel { background: var(--s2); color: var(--muted); border: 1px solid var(--border); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--green); color: #0f1117;
+  padding: 11px 22px; border-radius: 99px; font-size: 13px; font-weight: 600;
+  z-index: 200; transition: transform .3s ease; white-space: nowrap; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.err  { background: var(--red); color: #fff; }
+
+/* ── EMPTY / LOADING ── */
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty .ico { font-size: 48px; margin-bottom: 12px; }
+.empty p { font-size: 14px; }
+.loading-screen {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 999;
+}
+.loading-screen .logo-big { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
+.loading-screen .logo-big em { color: var(--accent); font-style: normal; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+.loading-screen p { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="logo-big">🦁 Caçadores <em>de Pais</em></div>
+  <div class="spinner"></div>
+  <p>Carregando dados...</p>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">🦁 Caçadores <em>de Pais</em></div>
+  <div class="header-right">
+    <div class="pill" id="countdown">⏳ …</div>
+    <div class="icon-btn" id="syncBtn" onclick="syncData()" title="Atualizar">↻</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat c-all">  <div class="n" id="sTotal">0</div><div class="lbl">Total</div></div>
+  <div class="stat c-none"> <div class="n" id="sVirgem">0</div><div class="lbl">Não contat.</div></div>
+  <div class="stat c-try">  <div class="n" id="sTentando">0</div><div class="lbl">Tentando</div></div>
+  <div class="stat c-go">   <div class="n" id="sVai">0</div><div class="lbl">Vai / Sem insc.</div></div>
+  <div class="stat c-ok">   <div class="n" id="sInscrito">0</div><div class="lbl">Inscrito ✓</div></div>
+  <div class="stat c-no">   <div class="n" id="sNao">0</div><div class="lbl">Não vai</div></div>
+</div>
+
+<!-- SEARCH -->
+<div class="searchbar">
+  <input type="search" id="searchInput" placeholder="🔍 Buscar..." autocomplete="off">
+  <div class="filter-btn" onclick="openDrawer()" title="Filtrar">⚙</div>
+  <div class="add-btn" onclick="openAddModal()">+</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="content"></div>
+
+<!-- FILTER DRAWER -->
+<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()">
+  <div class="drawer" onclick="e=>e.stopPropagation()">
+    <h3>Filtrar por status</h3>
+    <div class="opts" id="drawerOpts"></div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Adicionar chanich</h2>
+    <div class="field-row"><label>Nome</label><input type="text" id="mNome" placeholder="Nome da criança"></div>
+    <div class="field-row"><label>Turma</label><select id="mTurma" style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;"></select></div>
+    <div class="field-row"><label>Telefone dos pais</label><input type="tel" id="mTelefone" placeholder="(21) 99999-9999"></div>
+    <div class="field-row"><label>Caçador responsável</label><input type="text" id="mCacador" placeholder="Seu nome"></div>
+    <div class="field-row">
+      <label>Status</label>
+      <div class="status-row" id="mStatusRow"></div>
+    </div>
+    <div class="field-row"><label>Observações</label><textarea id="mObs" placeholder="Ex: ligar depois das 18h, interesse confirmado..."></textarea></div>
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="m-save" id="mSaveBtn" onclick="saveModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzz0PSi-XiDIaNXUx0YcXEru62K_tOf-kg8LFmrva_lVeUWBrK12K5bjT2lamO6NSA02Q/exec';
+const MACHANE   = new Date('2026-07-07');
+
+const TURMAS = [
+  "Zraim Banim","Zraim Banot",
+  "Nevatim Banim","Nevatim Banot",
+  "Nitzanim Banim","Nitzanim Banot",
+  "Maalot Banim","Maalot Banot",
+  "Maapilim","Haroe"
+];
+
+const STATUS = [
+  { key:"virgem",   label:"Não contatado",    cls:"b-virgem"  },
+  { key:"tentando", label:"Tentando",          cls:"b-tentando"},
+  { key:"vai",      label:"Vai / Sem inscrição",cls:"b-vai"    },
+  { key:"inscrito", label:"Inscrito ✓",        cls:"b-inscrito"},
+  { key:"nao",      label:"Não vai",            cls:"b-nao"    },
+];
+
+// mapa de label da planilha → key interna
+const LABEL_TO_KEY = {};
+STATUS.forEach(s => LABEL_TO_KEY[s.label.toLowerCase()] = s.key);
+LABEL_TO_KEY["nao contatado"] = "virgem";
+LABEL_TO_KEY["não contatado"] = "virgem";
+LABEL_TO_KEY["vai / sem inscricao"] = "vai";
+LABEL_TO_KEY["inscrito √"] = "inscrito";
+
+function keyToLabel(k) { return STATUS.find(s=>s.key===k)?.label || k; }
+function keyCls(k)     { return STATUS.find(s=>s.key===k)?.cls || 'b-virgem'; }
+
+// ── STATE ────────────────────────────────────────────────
+let data        = [];
+let activeTurma = "Todas";
+let filterKey   = "";
+let editingId   = null;
+let modalStatus = "virgem";
+
+// ── INIT ─────────────────────────────────────────────────
+window.onload = () => { updateCountdown(); setInterval(updateCountdown,60000); loadData(); };
+
+// ── COUNTDOWN ────────────────────────────────────────────
+function updateCountdown() {
+  const d = Math.ceil((MACHANE - new Date()) / 86400000);
+  document.getElementById('countdown').textContent = d > 0 ? `⏳ ${d} dias` : '🎉 É hoje!';
+}
+
+// ── API ──────────────────────────────────────────────────
+function loadData() {
+  document.getElementById('loadingScreen').style.display = 'flex';
+  return new Promise((resolve) => {
+    const cbName = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    window[cbName] = function(raw) {
+      try {
+        data = raw.map(r => ({
+          ...r,
+          status: LABEL_TO_KEY[r.status.toLowerCase().trim()] || 'virgem'
+        }));
+      } catch(e) {
+        showToast('Erro ao processar dados.', true);
+        data = [];
+      }
+      delete window[cbName];
+      script.remove();
+      document.getElementById('loadingScreen').style.display = 'none';
+      buildTabs(); buildDrawer(); render();
+      resolve();
+    };
+    script.onerror = () => {
+      showToast('Erro ao carregar. Verifique conexão.', true);
+      data = [];
+      delete window[cbName];
+      script.remove();
+      document.getElementById('loadingScreen').style.display = 'none';
+      buildTabs(); buildDrawer(); render();
+      resolve();
+    };
+    script.src = SCRIPT_URL + '?action=getAll&callback=' + cbName;
+    document.head.appendChild(script);
+  });
+}
+
+async function syncData() {
+  const btn = document.getElementById('syncBtn');
+  btn.classList.add('spinning');
+  await loadData();
+  btn.classList.remove('spinning');
+  showToast('Atualizado!');
+}
+
+async function api(body) {
+  try {
+    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify(body) });
+  } catch(e) { showToast('Erro ao salvar!', true); }
+}
+
+// ── TABS ─────────────────────────────────────────────────
+function buildTabs() {
+  const all = ["Todas",...TURMAS];
+  document.getElementById('tabs').innerHTML = all.map(t =>
+    `<div class="tab ${t===activeTurma?'on':''}" onclick="setTurma('${t}')">${t}</div>`
+  ).join('');
+}
+function setTurma(t) { activeTurma=t; buildTabs(); render(); }
+
+// ── FILTER DRAWER ─────────────────────────────────────────
+function buildDrawer() {
+  const opts = [{key:"",label:"Todos"},...STATUS];
+  document.getElementById('drawerOpts').innerHTML = opts.map(s=>
+    `<div class="drawer-opt ${filterKey===s.key?'sel':''}" onclick="setFilter('${s.key}')">${s.label}</div>`
+  ).join('');
+}
+function openDrawer()  { document.getElementById('drawerBg').classList.add('open'); }
+function closeDrawer() { document.getElementById('drawerBg').classList.remove('open'); }
+function setFilter(k)  { filterKey=k; buildDrawer(); closeDrawer(); render(); }
+
+// ── RENDER ───────────────────────────────────────────────
+function getFiltered() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  return data.filter(c => {
+    if (activeTurma !== "Todas" && c.turma !== activeTurma) return false;
+    if (filterKey && c.status !== filterKey) return false;
+    if (q && !c.nome.toLowerCase().includes(q) && !(c.cacador||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function updateStats() {
+  const ct = {virgem:0,tentando:0,vai:0,inscrito:0,nao:0};
+  data.forEach(c => ct[c.status] = (ct[c.status]||0)+1);
+  document.getElementById('sTotal').textContent   = data.length;
+  document.getElementById('sVirgem').textContent  = ct.virgem;
+  document.getElementById('sTentando').textContent= ct.tentando;
+  document.getElementById('sVai').textContent     = ct.vai;
+  document.getElementById('sInscrito').textContent= ct.inscrito;
+  document.getElementById('sNao').textContent     = ct.nao;
+}
+
+function render() {
+  updateStats();
+  const filtered = getFiltered();
+  const el = document.getElementById('content');
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty"><div class="ico">🔍</div><p>Nenhum chanich encontrado.</p></div>`;
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(c => { if(!groups[c.turma]) groups[c.turma]=[]; groups[c.turma].push(c); });
+  const ordem = activeTurma === "Todas" ? TURMAS : [activeTurma];
+
+  el.innerHTML = ordem.filter(t=>groups[t]?.length).map(turma => `
+    <div class="turma-label">${turma} <span>${groups[turma].length}</span></div>
+    ${groups[turma].map(cardHTML).join('')}
+  `).join('');
+}
+
+function cardHTML(c) {
+  const cls = keyCls(c.status);
+  const lbl = keyToLabel(c.status);
+  return `
+  <div class="card" id="card-${c.id}">
+    <div class="card-top" onclick="toggleCard(${c.id})">
+      <div class="card-name">${esc(c.nome)}</div>
+      <div class="badge ${cls}" onclick="event.stopPropagation();quickStatus(${c.id})">
+        <span class="dot"></span>${lbl}
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <label>Status</label>
+        <div class="status-row">
+          ${STATUS.map(s=>`<div class="status-opt badge ${s.cls} ${c.status===s.key?'sel':''}" onclick="setCardStatus(${c.id},'${s.key}')">${s.label}</div>`).join('')}
+        </div>
+      </div>
+      <div class="field-row">
+        <label>Caçador responsável</label>
+        <input type="text" id="cac-${c.id}" value="${esc(c.cacador||'')}" placeholder="Seu nome">
+      </div>
+      <div class="field-row">
+        <label>Telefone dos pais</label>
+        <input type="tel" id="tel-${c.id}" value="${esc(c.telefone||'')}" placeholder="(21) 99999-9999">
+      </div>
+      <div class="field-row">
+        <label>Observações</label>
+        <textarea id="obs-${c.id}" placeholder="Ex: ligar depois das 18h...">${esc(c.obs||'')}</textarea>
+      </div>
+      <div class="card-actions">
+        <button class="btn-del" onclick="deleteCard(${c.id})">🗑 Remover</button>
+        <button class="btn-save" onclick="saveCard(${c.id})">💾 Salvar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── CARD ACTIONS ─────────────────────────────────────────
+function toggleCard(id) {
+  document.getElementById(`card-${id}`).classList.toggle('expanded');
+}
+
+const CYCLE = ["virgem","tentando","vai","inscrito","nao"];
+
+async function quickStatus(id) {
+  const c = data.find(x=>x.id===id);
+  if(!c) return;
+  c.status = CYCLE[(CYCLE.indexOf(c.status)+1) % CYCLE.length];
+  render();
+  showToast(`${c.nome} → ${keyToLabel(c.status)}`);
+  await api({ action:'update', id:c.id, status:keyToLabel(c.status), cacador:c.cacador, telefone:c.telefone, obs:c.obs });
+}
+
+function setCardStatus(id, key) {
+  const c = data.find(x=>x.id===id);
+  if(!c) return;
+  c.status = key;
+  // re-render only this card's status row + badge
+  const card = document.getElementById(`card-${id}`);
+  // update badge
+  const badge = card.querySelector('.badge');
+  badge.className = `badge ${keyCls(key)}`;
+  badge.innerHTML = `<span class="dot"></span>${keyToLabel(key)}`;
+  // update status opts
+  card.querySelectorAll('.status-opt').forEach(el => {
+    el.classList.toggle('sel', el.textContent.trim() === keyToLabel(key) || el.onclick?.toString().includes(`'${key}'`));
+  });
+  // easier: just re-render
+  render();
+}
+
+async function saveCard(id) {
+  const c = data.find(x=>x.id===id);
+  if(!c) return;
+  c.cacador  = document.getElementById(`cac-${id}`).value.trim();
+  c.telefone = document.getElementById(`tel-${id}`).value.trim();
+  c.obs      = document.getElementById(`obs-${id}`).value.trim();
+  showToast('Salvando...');
+  await api({ action:'update', id:c.id, status:keyToLabel(c.status), cacador:c.cacador, telefone:c.telefone, obs:c.obs });
+  showToast('Salvo! ✓');
+}
+
+async function deleteCard(id) {
+  const c = data.find(x=>x.id===id);
+  if(!confirm(`Remover ${c.nome}?`)) return;
+  data = data.filter(x=>x.id!==id);
+  render();
+  await api({ action:'delete', id });
+  showToast('Removido');
+}
+
+// ── ADD MODAL ─────────────────────────────────────────────
+function buildStatusRow(containerId, current) {
+  document.getElementById(containerId).innerHTML = STATUS.map(s=>
+    `<div class="status-opt badge ${s.cls} ${current===s.key?'sel':''}" onclick="selectModalStatus('${s.key}')">${s.label}</div>`
+  ).join('');
+}
+
+function openAddModal() {
+  editingId = null; modalStatus = 'virgem';
+  document.getElementById('modalTitle').textContent = 'Adicionar chanich';
+  document.getElementById('mNome').value = '';
+  document.getElementById('mTelefone').value = '';
+  document.getElementById('mCacador').value = '';
+  document.getElementById('mObs').value = '';
+  const sel = document.getElementById('mTurma');
+  sel.innerHTML = TURMAS.map(t=>`<option value="${t}">${t}</option>`).join('');
+  if (activeTurma !== "Todas") sel.value = activeTurma;
+  buildStatusRow('mStatusRow', modalStatus);
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+
+function selectModalStatus(key) {
+  modalStatus = key;
+  buildStatusRow('mStatusRow', key);
+}
+
+async function saveModal() {
+  const nome = document.getElementById('mNome').value.trim();
+  if (!nome) { alert('Coloca o nome!'); return; }
+  const payload = {
+    nome,
+    turma:    document.getElementById('mTurma').value,
+    telefone: document.getElementById('mTelefone').value.trim(),
+    cacador:  document.getElementById('mCacador').value.trim(),
+    obs:      document.getElementById('mObs').value.trim(),
+    status:   keyToLabel(modalStatus)
+  };
+  document.getElementById('mSaveBtn').textContent = 'Salvando...';
+  await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({action:'add',...payload}) });
+  // id temporário local — será correto após próximo sync
+  const tempId = Date.now();
+  data.push({ id: tempId, ...payload, status: modalStatus });
+  document.getElementById('mSaveBtn').textContent = 'Salvar';
+  closeModal(); render();
+  showToast(`${nome} adicionado! ✓`);
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err?' err':'');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── EVENTS ────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('modalBg').addEventListener('click', e => { if(e.target.id==='modalBg') closeModal(); });
+</script>
+</body>
+</html>
