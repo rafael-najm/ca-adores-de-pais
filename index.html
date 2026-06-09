@@ -246,6 +246,20 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.err  { background: var(--red); color: #fff; }
 
+/* ── RANKING ── */
+.rank-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--s2); border: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.rank-pos { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; min-width: 28px; text-align: center; }
+.rank-info { flex: 1; min-width: 0; }
+.rank-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.rank-count { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent); }
+.rank-zero  { color: var(--muted) !important; }
+
 /* ── EMPTY / LOADING ── */
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
 .empty .ico { font-size: 48px; margin-bottom: 12px; }
@@ -275,6 +289,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   <div class="logo">🦁 Caçadores <em>de Pais</em></div>
   <div class="header-right">
     <div class="pill" id="countdown">⏳ …</div>
+    <div class="icon-btn" onclick="openRanking()" title="Ranking">🏆</div>
     <div class="icon-btn" id="syncBtn" onclick="syncData()" title="Atualizar">↻</div>
   </div>
 </div>
@@ -328,6 +343,17 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeModal()">Cancelar</button>
       <button class="m-save" id="mSaveBtn" onclick="saveModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- RANKING MODAL -->
+<div class="modal-bg" id="rankingBg" onclick="closeRanking()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:80vh;overflow-y:auto;">
+    <h2>🏆 Ranking de Caçadores</h2>
+    <div id="rankingList" style="margin-top:12px;"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="m-cancel" style="width:100%" onclick="closeRanking()">Fechar</button>
     </div>
   </div>
 </div>
@@ -451,6 +477,50 @@ function buildDrawer() {
 function openDrawer()  { document.getElementById('drawerBg').classList.add('open'); }
 function closeDrawer() { document.getElementById('drawerBg').classList.remove('open'); }
 function setFilter(k)  { filterKey=k; buildDrawer(); closeDrawer(); render(); }
+
+// ── RANKING ──────────────────────────────────────────────
+function openRanking() {
+  const medals = ['🥇','🥈','🥉'];
+  const map = {};
+  data.forEach(c => {
+    const key = (c.cacador || '').trim() || '—';
+    if (!map[key]) map[key] = { total:0, inscrito:0, vai:0, tentando:0 };
+    map[key].total++;
+    if (c.status === 'inscrito') map[key].inscrito++;
+    else if (c.status === 'vai')      map[key].vai++;
+    else if (c.status === 'tentando') map[key].tentando++;
+  });
+
+  const sorted = Object.entries(map)
+    .sort((a,b) => b[1].inscrito - a[1].inscrito || b[1].total - a[1].total);
+
+  const semCacador = sorted.find(([k]) => k === '—');
+  const comCacador = sorted.filter(([k]) => k !== '—');
+
+  const rows = [...comCacador, ...(semCacador ? [semCacador] : [])];
+
+  document.getElementById('rankingList').innerHTML = rows.map(([nome, s], i) => {
+    const isSem = nome === '—';
+    const pos = isSem ? '—' : (medals[i] || `${i+1}.`);
+    const sub = [
+      s.inscrito ? `${s.inscrito} inscrito${s.inscrito>1?'s':''}` : '',
+      s.vai      ? `${s.vai} confirmado${s.vai>1?'s':''}` : '',
+      s.tentando ? `${s.tentando} tentando` : '',
+    ].filter(Boolean).join(' · ') || 'nenhum inscrito';
+    return `
+    <div class="rank-item">
+      <div class="rank-pos">${pos}</div>
+      <div class="rank-info">
+        <div class="rank-name">${isSem ? 'Sem caçador' : nome}</div>
+        <div class="rank-sub">${sub}</div>
+      </div>
+      <div class="rank-count ${s.total===0?'rank-zero':''}">${s.total}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rankingBg').classList.add('open');
+}
+function closeRanking() { document.getElementById('rankingBg').classList.remove('open'); }
 
 // ── RENDER ───────────────────────────────────────────────
 function getFiltered() {
