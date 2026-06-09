@@ -35,7 +35,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 50;
 }
-.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; }
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; white-space: nowrap; }
 .logo em { color: var(--accent); font-style: normal; }
 .header-right { display: flex; align-items: center; gap: 8px; }
 .pill {
@@ -53,25 +53,30 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── STATS ── */
-.stats {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 6px; padding: 8px 12px;
+.stats-wrap {
+  padding: 12px 16px 14px;
   background: var(--s1); border-bottom: 1px solid var(--border);
 }
-.stat {
-  background: var(--s2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 7px 6px; text-align: center;
+.stats-hero {
+  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px;
 }
-.stat .n {
-  font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; line-height: 1;
+.hero-n     { font-family: 'Syne', sans-serif; font-size: 34px; font-weight: 800; color: var(--green); line-height: 1; }
+.hero-sep   { font-size: 18px; color: var(--muted); margin: 0 5px; }
+.hero-total { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--muted); }
+.hero-lbl   { font-size: 12px; color: var(--muted); margin-left: 7px; }
+.hero-pct   { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); opacity:.8; }
+.progress-track { height: 4px; background: var(--s3); border-radius: 99px; overflow: hidden; margin-bottom: 10px; }
+.progress-fill  { height: 100%; background: var(--green); border-radius: 99px; transition: width .5s ease; width: 0%; }
+.stats-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  font-size: 11px; font-weight: 600; padding: 4px 10px;
+  border-radius: 99px; border: 1px solid transparent; white-space: nowrap;
 }
-.stat .lbl { font-size: 8px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .4px; }
-.stat.c-all .n   { color: var(--text); }
-.stat.c-none .n  { color: var(--muted); }
-.stat.c-try .n   { color: var(--blue); }
-.stat.c-go .n    { color: var(--yellow); }
-.stat.c-ok .n    { color: var(--green); }
-.stat.c-no .n    { color: var(--red); }
+.chip b { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 12px; margin-right: 3px; }
+.chip.c-none { background: rgba(120,128,160,.1); border-color: rgba(120,128,160,.25); color: var(--muted); }
+.chip.c-try  { background: rgba(79,156,249,.1);  border-color: rgba(79,156,249,.25);  color: var(--blue);   }
+.chip.c-go   { background: rgba(245,197,24,.1);  border-color: rgba(245,197,24,.25);  color: var(--yellow); }
+.chip.c-no   { background: rgba(240,92,92,.1);   border-color: rgba(240,92,92,.25);   color: var(--red);    }
 
 /* ── SEARCH BAR ── */
 .searchbar {
@@ -295,13 +300,23 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 </div>
 
 <!-- STATS -->
-<div class="stats">
-  <div class="stat c-all">  <div class="n" id="sTotal">0</div><div class="lbl">Total</div></div>
-  <div class="stat c-none"> <div class="n" id="sVirgem">0</div><div class="lbl">Não contat.</div></div>
-  <div class="stat c-try">  <div class="n" id="sTentando">0</div><div class="lbl">Tentando</div></div>
-  <div class="stat c-go">   <div class="n" id="sVai">0</div><div class="lbl">Vai / Sem insc.</div></div>
-  <div class="stat c-ok">   <div class="n" id="sInscrito">0</div><div class="lbl">Inscrito ✓</div></div>
-  <div class="stat c-no">   <div class="n" id="sNao">0</div><div class="lbl">Não vai</div></div>
+<div class="stats-wrap">
+  <div class="stats-hero">
+    <div>
+      <span class="hero-n" id="sInscrito">0</span>
+      <span class="hero-sep">/</span>
+      <span class="hero-total" id="sTotal">0</span>
+      <span class="hero-lbl">inscritos</span>
+    </div>
+    <span class="hero-pct" id="sPct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="sProgress"></div></div>
+  <div class="stats-chips">
+    <div class="chip c-none"><b id="sVirgem">0</b>s/ contato</div>
+    <div class="chip c-try"><b id="sTentando">0</b>tentando</div>
+    <div class="chip c-go"><b id="sVai">0</b>confirmados</div>
+    <div class="chip c-no"><b id="sNao">0</b>não vão</div>
+  </div>
 </div>
 
 <!-- SEARCH -->
@@ -405,7 +420,7 @@ window.onload = () => { updateCountdown(); setInterval(updateCountdown,60000); l
 // ── COUNTDOWN ────────────────────────────────────────────
 function updateCountdown() {
   const d = Math.ceil((MACHANE - new Date()) / 86400000);
-  document.getElementById('countdown').textContent = d > 0 ? `⏳ ${d} dias` : '🎉 É hoje!';
+  document.getElementById('countdown').textContent = d > 0 ? `⏳ ${d}d` : '🎉 hoje!';
 }
 
 // ── API ──────────────────────────────────────────────────
@@ -494,10 +509,7 @@ function openRanking() {
   const sorted = Object.entries(map)
     .sort((a,b) => b[1].inscrito - a[1].inscrito || b[1].total - a[1].total);
 
-  const semCacador = sorted.find(([k]) => k === '—');
-  const comCacador = sorted.filter(([k]) => k !== '—');
-
-  const rows = [...comCacador, ...(semCacador ? [semCacador] : [])];
+  const rows = sorted.filter(([k]) => k !== '—');
 
   document.getElementById('rankingList').innerHTML = rows.map(([nome, s], i) => {
     const isSem = nome === '—';
@@ -536,12 +548,16 @@ function getFiltered() {
 function updateStats() {
   const ct = {virgem:0,tentando:0,vai:0,inscrito:0,nao:0};
   data.forEach(c => ct[c.status] = (ct[c.status]||0)+1);
-  document.getElementById('sTotal').textContent   = data.length;
-  document.getElementById('sVirgem').textContent  = ct.virgem;
-  document.getElementById('sTentando').textContent= ct.tentando;
-  document.getElementById('sVai').textContent     = ct.vai;
-  document.getElementById('sInscrito').textContent= ct.inscrito;
-  document.getElementById('sNao').textContent     = ct.nao;
+  const total = data.length;
+  const pct = total ? Math.round(ct.inscrito / total * 100) : 0;
+  document.getElementById('sTotal').textContent    = total;
+  document.getElementById('sVirgem').textContent   = ct.virgem;
+  document.getElementById('sTentando').textContent = ct.tentando;
+  document.getElementById('sVai').textContent      = ct.vai;
+  document.getElementById('sInscrito').textContent = ct.inscrito;
+  document.getElementById('sNao').textContent      = ct.nao;
+  document.getElementById('sPct').textContent      = pct + '%';
+  document.getElementById('sProgress').style.width = pct + '%';
 }
 
 function render() {
