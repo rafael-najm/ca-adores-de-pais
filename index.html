@@ -383,26 +383,39 @@ function updateCountdown() {
 }
 
 // ── API ──────────────────────────────────────────────────
-async function loadData() {
+function loadData() {
   document.getElementById('loadingScreen').style.display = 'flex';
-  try {
-    const res = await fetch(SCRIPT_URL + '?action=getAll');
-    const raw = await res.json();
-    try {
-      data = raw.map(r => ({
-        ...r,
-        status: LABEL_TO_KEY[r.status.toLowerCase().trim()] || 'virgem'
-      }));
-    } catch(e) {
-      showToast('Erro ao processar dados.', true);
+  return new Promise((resolve) => {
+    const cbName = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    window[cbName] = function(raw) {
+      try {
+        data = raw.map(r => ({
+          ...r,
+          status: LABEL_TO_KEY[r.status.toLowerCase().trim()] || 'virgem'
+        }));
+      } catch(e) {
+        showToast('Erro ao processar dados.', true);
+        data = [];
+      }
+      delete window[cbName];
+      script.remove();
+      document.getElementById('loadingScreen').style.display = 'none';
+      buildTabs(); buildDrawer(); render();
+      resolve();
+    };
+    script.onerror = () => {
+      showToast('Erro ao carregar. Verifique conexão.', true);
       data = [];
-    }
-  } catch(e) {
-    showToast('Erro ao carregar. Verifique conexão.', true);
-    data = [];
-  }
-  document.getElementById('loadingScreen').style.display = 'none';
-  buildTabs(); buildDrawer(); render();
+      delete window[cbName];
+      script.remove();
+      document.getElementById('loadingScreen').style.display = 'none';
+      buildTabs(); buildDrawer(); render();
+      resolve();
+    };
+    script.src = SCRIPT_URL + '?action=getAll&callback=' + cbName;
+    document.head.appendChild(script);
+  });
 }
 
 async function syncData() {
