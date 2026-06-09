@@ -38,7 +38,10 @@ function buildResponse(data, callback) {
 }
 
 function getSheet() {
-  return SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+  // Pega a aba pelo nome; se não existir (ex: "Página1" em pt-BR),
+  // cai para a primeira aba da planilha. Assim não depende do nome exato.
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  return ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];
 }
 
 function getAllData() {
